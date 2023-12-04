@@ -1,0 +1,41 @@
+{% load i18n %}{% load static %}{% load static_versions %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <title>{% trans "Aggregator Validation" %}</title>
+
+    <link rel='stylesheet' href='{% vstatic "/lib/bootstrap/dist/css/bootstrap.min.css" %}' />
+    <link rel='stylesheet' href='{% vstatic "/stylesheets/base.css" %}' />
+    {% if branding %}
+    <link rel='stylesheet' href='{% static "/stylesheets/branding/" %}{{branding}}/base.css?{% version %}' />
+    {% endif %}
+
+     <!--[if lt IE 9]>
+    <script src='{% vstatic "/lib/html5shiv/dist/html5shiv.min.js" %}'></script>
+    <script src='{% vstatic "/lib/respond/dest/respond.min.js" %}'></script>
+    <![endif]-->
+
+    <script src='{% vstatic "/lib/jquery/dist/jquery.min.js" %}'></script>
+    <script src='{% vstatic "/lib/bootstrap/dist/js/bootstrap.min.js" %}'></script>
+</head>
+<body>
+    <div role='banner' class='navbar navbar-inverse'>
+        <div class='container'>
+            <div class='navbar-header'>
+                <span class='navbar-brand logo'>{% trans "Aggregator" %} {{branding}}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class='container'>
+        <div class='jumbotron'>
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+</body>
+
+{% block javascript %}{% endblock %}
+</html>

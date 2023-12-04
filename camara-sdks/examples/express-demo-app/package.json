@@ -1,0 +1,22 @@
+{
+  "name": "express-demo-app",
+  "version": "1.0.0",
+  "description": "Express Demo App using CAMARA SDK",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "start:dev": "tsx watch src/index.ts",
+    "start:pro": "tsx src/index.ts"
+  },
+  "dependencies": {
+    "@types/express-session": "^1.17.7",
+    "body-parser": "^1.20.2",
+    "camara-express-sdk": "workspace:*",
+    "camara-node-sdk": "workspace:*",
+    "cookie-session": "^2.0.0",
+    "ejs": "^3.1.9",
+    "express": "^4.18.2",
+    "node-jose": "^2.2.0",
+    "uuid": "^9.0.0"
+  }
+}

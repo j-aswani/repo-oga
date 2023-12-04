@@ -1,0 +1,78 @@
+_format_version: "3.0"
+_transform: true
+
+# jwt plugin: https://docs.konghq.com/hub/kong-inc/jwt/
+consumers:
+  - username: johndoe
+    custom_id: johndoe
+  - username: johndoe-azure
+    custom_id: johndoe-azure
+
+jwt_secrets:
+  - consumer: johndoe
+    algorithm: RS256
+    # issuer
+    key: http://operator-platform-authserver-1:9010
+    rsa_public_key: |-
+      -----BEGIN PUBLIC KEY-----
+      MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEA5LTYjBvFD7Zdz8/gP/Yr
+      B+sdUmfiB6dtbYc3lFw2GqpkG7qXRq1RjcNnJZbL9RO5O3YdJgyJmsz8oSP87KyJ
+      cm+DiE5XkioBTWHRGdT7pOjaPzZDN0yxOFFcykQyBL9A8SC2pad+hVDzFb9v3hL7
+      ot8h4ANNZ8N0wxkRfpBKS9S2BLknc6D01bS1MvrdC7xMUG0Eg4+VlcJfFuZ3UADF
+      uFhbZjSQP4ubpDZU/EKiENdNeDMMsTlxSVB7ZATwAfa2Gmrr0H899pD/DBl2Dw6i
+      zut+pVNsVaIDqcuZbQ334TeP/mUQ/783qhEFzNfv1yTZ0x4rKR6zvZ28DvoC3mxG
+      vXM5P1bmqZ1C7WQMmHzUwLNskoM/mhwluyIuYL1U2LlQa9nhdUM3zkeqjt1KVmMI
+      nmDSb1OdzsWUb8kzXbH0gcscmBn3+H6nBJdcI3N6xSneyg2K1TdIHmgkTEO3m2Fs
+      GTBpmgfhcTOFUUaBrKKP89xHdAZtnJvdUsHlrfCI9718bvNN2SJ0qnYhDlHw3XaH
+      hpqx2WbWaOv0wMawEmQn6x6B1d3MJnfs6yFfe5SHFg8YQIRDO1opbQojz3ONg2nU
+      sFF5AxjzZ7YmGtYMM7YhuPN8RwIwsyR3tQ376tiRmprd2kSyUIN98o9TtZHkyeCn
+      +umNNspKb5BU4zH/pgHhM9ECAwEAAQ==
+      -----END PUBLIC KEY-----
+  - consumer: johndoe-azure
+    algorithm: RS256
+    # issuer
+    key: https://operator-platform-authserver-1.opengateway.baikalplatform.es
+    rsa_public_key: |-
+      -----BEGIN PUBLIC KEY-----
+      MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEA5LTYjBvFD7Zdz8/gP/Yr
+      B+sdUmfiB6dtbYc3lFw2GqpkG7qXRq1RjcNnJZbL9RO5O3YdJgyJmsz8oSP87KyJ
+      cm+DiE5XkioBTWHRGdT7pOjaPzZDN0yxOFFcykQyBL9A8SC2pad+hVDzFb9v3hL7
+      ot8h4ANNZ8N0wxkRfpBKS9S2BLknc6D01bS1MvrdC7xMUG0Eg4+VlcJfFuZ3UADF
+      uFhbZjSQP4ubpDZU/EKiENdNeDMMsTlxSVB7ZATwAfa2Gmrr0H899pD/DBl2Dw6i
+      zut+pVNsVaIDqcuZbQ334TeP/mUQ/783qhEFzNfv1yTZ0x4rKR6zvZ28DvoC3mxG
+      vXM5P1bmqZ1C7WQMmHzUwLNskoM/mhwluyIuYL1U2LlQa9nhdUM3zkeqjt1KVmMI
+      nmDSb1OdzsWUb8kzXbH0gcscmBn3+H6nBJdcI3N6xSneyg2K1TdIHmgkTEO3m2Fs
+      GTBpmgfhcTOFUUaBrKKP89xHdAZtnJvdUsHlrfCI9718bvNN2SJ0qnYhDlHw3XaH
+      hpqx2WbWaOv0wMawEmQn6x6B1d3MJnfs6yFfe5SHFg8YQIRDO1opbQojz3ONg2nU
+      sFF5AxjzZ7YmGtYMM7YhuPN8RwIwsyR3tQ376tiRmprd2kSyUIN98o9TtZHkyeCn
+      +umNNspKb5BU4zH/pgHhM9ECAwEAAQ==
+      -----END PUBLIC KEY-----
+
+services:
+  - name: webfinger
+    url: http://operator-platform-authserver-1:9010
+    plugins:
+      - name: jwt
+      - name: request-transformer
+        config:
+          replace:
+            headers: [ "Authorization: Basic NGQwMTkyNjMtM2ZmMC00ZDBlLWE0OGEtNWIzZDg3NzAzOGRjOjQyMjJmZGRkLTY0YjYtNDQ1Mi1iMjRlLTIzY2FhZTljY2MwOA==" ]
+      - name: log-signature
+        config:
+          path: /opt/logs/authserver-1-request.log
+    routes:
+      - name: webfinger
+        strip_path: false
+        paths:
+          - /.well-known/webfinger
+  - name: camara
+    url: http://operator-platform-camara-apis-1:8001
+    plugins:
+      - name: jwt
+      - name: log-signature
+        config:
+          path: /opt/logs/operator-1-request.log
+    routes:
+      - name: root
+        paths:
+          - /

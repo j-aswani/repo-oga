@@ -1,0 +1,47 @@
+<h2>JWT Bearer Example: Device Location Verification API</h2>
+<div class="alert alert-warning" role="alert">
+    <p>You can click on the <i>Device Location Verification</i> button in
+    order to consume Camara APIs. The complete process follow the next logic:
+    <ul>
+    <li>If you don't have an access token yet:
+        <ul>
+        <li>Obtain an access token:
+            <ul>
+            <li>You send a POST /token to the Aggregator.</li>
+            <li>The Aggregator's Authserver calls the Telco Finder using the IP address as input
+                to determine the target Operator Platform</li>
+            <li>The Aggregator requests the target Operator Platform a OIDC 3-legged access token.</li>
+            <li>An access token will be generated for the demo-app</li>
+            </ul>
+        </li>
+        <li>Consume CAMARA API to get the information</li>
+        </ul>
+    </li>
+    <li>If you already have an access token:
+        <ul>
+        <li>Consume CAMARA API to get the information</li>
+        </ul>
+    </li>
+    </ul>
+    You can see a detailed explanation in the following link: <a
+    href="https://github.com/Telefonica/opengateway-aggregation-poc/blob/main/README.md">Architecture
+    Information</a>
+    </p>
+</div>
+<hr/>
+
+<div class="row align-items-center">
+    <div class="col-md-6 col-sm-6" >
+    <select name="ipport" id="ipport">
+        <option value="<%= clientIp %>" selected><%= clientIp %> (Your IP)</option>
+        <option value="83.58.58.57">83.58.58.57:3543 (Telefónica)</option>
+        <option value="109.42.3.0">109.42.3.0:4631 (Vodafone)</option>
+    </select>
+    </div>
+    <div class="col-md-6 col-sm-6">
+    <a id="jwtbearer-button" class="btn btn-primary" style="margin: 10px;" href="/jwtbearer/verify?ip=<%= clientIp %>">
+        Device Location Verification<br />
+        JWT Bearer
+    </a>
+    </div>
+</div>

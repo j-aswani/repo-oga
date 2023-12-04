@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <%- include('../partials/head'); %>
+  <script>
+    $(function() {
+        $('a[data-toggle="tab"]').on('shown.bs.tab', function () {
+            localStorage.setItem('lastTab', $(this).attr('href'));
+        });
+        var lastTab = localStorage.getItem('lastTab');
+        if (lastTab) {
+            $(lastTab).addClass('show');
+            $(lastTab).addClass('active');
+            $('[href="' + lastTab + '"]').tab('show');
+            console.log(lastTab);
+        } else {
+          lastTab = "#tab1";
+          $(lastTab).addClass('show');
+          $(lastTab).addClass('active');
+          $('[href="' + lastTab + '"]').tab('show');
+          console.log(lastTab);
+        }
+        $('#ipport').on('change', function() {
+          var selectValue = this.value;
+          $('#jwtbearer-button').attr('href', '/jwtbearer/verify?ip=' + selectValue)
+        });
+    });
+    </script>
+</head>
+
+<body class="container">
+
+  <main>
+    <div class="jumbotron">
+      <h1>Demo App - Device Location</h1>
+      <hr />
+
+      <div class="row">
+        <div class="col-md-8 mb-8">
+          <h3>You are logged as: <b>
+              <%= phonenumber %>
+            </b></h3>
+        </div>
+        <div class="col-md-4">
+          <a class="btn btn-warning" href="/logout">Return</a>
+        </div>
+      </div>
+
+      <hr />
+
+      <div class="row">
+        <div class="col-md-2 mb-3">
+          <ul class="nav nav-tabs flex-column" id="myTab" role="tablist">
+            <li class="nav-item">
+              <a class="nav-link active" id="tab1-tab" data-toggle="tab" href="#tab1" role="tab" aria-controls="tab1"
+                aria-selected="true">JWT Bearer Example</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="tab2-tab" data-toggle="tab" href="#tab2" role="tab" aria-controls="tab2"
+                aria-selected="false">Authorization Code Example</a>
+            </li>
+          </ul>
+        </div>
+        <div class="col-md-10">
+          <div class="tab-content" id="myTabContent">
+            <div class="tab-pane fade" id="tab1" role="tabpanel" aria-labelledby="tab1-tab">
+              <%- include('../partials/jwt_bearer_panel'); %>
+
+            </div>
+            <div class="tab-pane fade" id="tab2" role="tabpanel" aria-labelledby="tab2-tab">
+              <%- include('../partials/authcode_panel'); %>
+            </div>
+          </div>
+        </div>
+      </div>
+      <br />
+      <hr />
+
+      <% if (error) { %>
+        <div class="alert alert-danger" role="alert">
+          <p>
+            An error was produced and you can see the problem in the result.
+          </p>
+        </div>
+        <br />
+      <% } %>
+
+      <p>Result: </p>
+      <% if (result) { %>
+        <pre><%= result %></pre>
+      <% } %>
+    </div>
+  </main>
+
+</body>
+
+</html>

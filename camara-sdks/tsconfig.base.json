@@ -1,0 +1,15 @@
+{
+  "compileOnSave": false,
+  "extends": ["@tsconfig/node18/tsconfig.json", "@tsconfig/esm/tsconfig.json"],
+  "compilerOptions": {
+    "baseUrl": ".",
+    "declaration": true,
+    "sourceMap": true,
+    "moduleResolution": "node",
+    "paths": {
+      "camara-express-sdk": ["camara-sdks/camara-express-sdk/src/index.ts"],
+      "camara-node-sdk": ["camara-sdks/camara-node-sdk/src/index.ts"],
+      "express-demo-app": ["examples/express-demo-app/src/index.ts"]
+    }
+  }
+}

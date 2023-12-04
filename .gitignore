@@ -1,0 +1,7 @@
+*.pyc
+.idea
+*.iml
+*.log
+logs/*
+!logs/.gitkeep
+.vscode

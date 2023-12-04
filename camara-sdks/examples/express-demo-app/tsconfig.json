@@ -1,0 +1,10 @@
+{
+  "extends": "@tsconfig/node18/tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      "camara-node-sdk/*": ["../src/*"],
+      "camara-node-sdk": ["../src/index.ts"]
+    }
+  },
+  "include": ["*.ts"]
+}

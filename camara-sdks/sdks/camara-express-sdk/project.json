@@ -1,0 +1,6 @@
+{
+  "name": "camara-express-sdk",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "tags": ["type:lib"]
+}

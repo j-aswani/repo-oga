@@ -1,0 +1,252 @@
+{
+	"info": {
+		"_postman_id": "def4008e-322f-4e09-8002-b8e9ec5348b4",
+		"name": "Opengateway Aggregation",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "2268836"
+	},
+	"item": [
+		{
+			"name": "Assertion (Internal)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const assertion = pm.response.json().assertion;",
+							"if (assertion) {",
+							"    pm.environment.set(\"ASSERTION\", assertion);",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"sub\":\"ipport:83.58.58.57\",\n    \"aud\":\"http://aggregator-telco-router-2:3322/\",\n    \"iss\":\"73902489-c201-4819-bdf9-3708a484fe21\",\n    \"jti\":\"89a06c71-5d6b-42c8-bdcc-af3c49a33fe6\",\n    \"scope\": \"device-location-verification-verify-read\",\n    \"exp\":1683813270,\n    \"iat\":1683813210\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/assertion",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"assertion"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Client Assertion (Internal)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const assertion = pm.response.json().assertion;",
+							"if (assertion) {",
+							"    pm.environment.set(\"CLIENT_ASSERTION\", assertion);",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"sub\":\"73902489-c201-4819-bdf9-3708a484fe21\",\n    \"iss\":\"73902489-c201-4819-bdf9-3708a484fe21\",\n    \"aud\":\"http://aggregator-telco-router-2:3322/\",\n    \"jti\":\"d4f4aac4-bc29-4f10-92c8-af5b1da99a5c\",\n    \"exp\":1683813270,\n    \"iat\":1683813210\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/assertion",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"assertion"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Token Aggregator",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const token = pm.response.json().access_token;",
+							"if (token) {",
+							"    pm.environment.set(\"ACCESS_TOKEN\", token);",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "grant_type",
+							"value": "urn:ietf:params:oauth:grant-type:jwt-bearer",
+							"type": "text"
+						},
+						{
+							"key": "client_assertion_type",
+							"value": "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
+							"type": "text"
+						},
+						{
+							"key": "client_assertion",
+							"value": "{{CLIENT_ASSERTION}}",
+							"type": "text"
+						},
+						{
+							"key": "assertion",
+							"value": "{{ASSERTION}}",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:3322/oauth2/token",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3322",
+					"path": [
+						"oauth2",
+						"token"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Verify (Camara API)",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{ACCESS_TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \n    \"coordinates\": { \n        \"longitude\": 3.8044, \n        \"latitude\": 42.3408 \n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3322/api/device-location-verification/v1/verify",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3322",
+					"path": [
+						"api",
+						"device-location-verification",
+						"v1",
+						"verify"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}

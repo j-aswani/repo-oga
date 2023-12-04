@@ -1,0 +1,34 @@
+<h2>Authorization Code Example: Device Location Verification API</h2>
+<div class="alert alert-warning" role="alert">
+    <p>You can click on the <i>Device Location Verification</i> button in
+    order to consume Camara APIs. The complete process follow the next logic:
+    <ul>
+    <li>If you don't have an access token yet:
+        <ul>
+        <li>Redirect the browser to the Aggregator's /authorize endpoint with the needed scopes.</li>
+        <li>The authserver redirects to the Demo App's callback including a code.</li>
+        <li>The Demo App exchanges that code for an access token.</li>
+        <li>Consume CAMARA API to get the information using that access token.</li>
+        </ul>
+    </li>
+    <li>If you already have an access token:
+        <ul>
+        <li>Consume CAMARA API to get the information</li>
+        </ul>
+    </li>
+    </ul>
+    You can see a detailed explanation in the following link: <a
+    href="https://auth0.com/docs/get-started/authentication-and-authorization-flow/authorization-code-flow">Architecture
+    Information</a>
+    </p>
+</div>
+<hr/>
+
+<div class="row d-flex justify-content-center">
+    <div class="col-md-4">
+    <a class="btn btn-primary" href="/auth/verify?state=<%= state %>">
+        Device Location Verification<br />
+        Authorization Code
+    </a>
+    </div>
+</div>

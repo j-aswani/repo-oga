@@ -1,0 +1,189 @@
+version: '3.9'
+
+services:
+
+  #
+  # AGGREGATORS
+  #
+  aggregator-telco-finder-1:
+    build:
+      context: ./aggregator/telco-finder
+    restart: on-failure
+    environment:
+      PORT: 2211
+      IP_RESOLVER: "resolvers.ip.AsnIpResolver" # allowed values: resolvers.ip.RipeIpResolver, resolvers.ip.AsnIpResolver
+      MSISDN_RESOLVER: "resolvers.msisdn.DummyMsisdnResolver" # allowed values: resolvers.msisdn.DummyMsisdnResolver
+    ports:
+      - 2211:2211
+
+  aggregator-telco-finder-2:
+    build:
+      context: ./aggregator/telco-finder
+    restart: on-failure
+    environment:
+      PORT: 2222
+      IP_RESOLVER: "resolvers.ip.AsnIpResolver" # allowed values: resolvers.ip.RipeIpResolver, resolvers.ip.AsnIpResolver
+      MSISDN_RESOLVER: "resolvers.msisdn.DummyMsisdnResolver" # allowed values: resolvers.msisdn.DummyMsisdnResolver
+    ports:
+      - 2222:2222
+
+  aggregator-telco-router-1:
+    build:
+      context: ./aggregator/telco-router
+    restart: on-failure
+    environment:
+      PORT: 3311
+      TELCO_FINDER_HOST: "http://aggregator-telco-finder-1:2211"
+      HOST: "${AGGREGATOR_TELCO_ROUTER_1_HOST:-http://aggregator-telco-router-1:3311}"
+      DATABASE_HOST: "mongodb:27017"
+      DATABASE_NAME: "aggregator-telco-router-1"
+      OPERATOR_ID: "TELEFONICA"
+    ports:
+      - 3311:3311
+
+  aggregator-telco-router-2:
+    build:
+      context: ./aggregator/telco-router
+    restart: on-failure
+    environment:
+      PORT: 3322
+      TELCO_FINDER_HOST: "http://aggregator-telco-finder-2:2222"
+      HOST: "${AGGREGATOR_TELCO_ROUTER_2_HOST:-http://aggregator-telco-router-2:3322}"
+      DATABASE_HOST: "mongodb:27017"
+      DATABASE_NAME: "aggregator-telco-router-2"
+      OPERATOR_ID: "VODAFONE"
+    ports:
+      - 3322:3322
+
+  #
+  # OPERATOR PLATFORMS
+  #
+  operator-platform-apigateway-1:
+    image: kong:3.1.1-alpine
+    user: kong
+    restart: on-failure
+    environment:
+      KONG_DATABASE: "off"
+      KONG_PLUGINS: "bundled,log-signature"
+      KONG_LUA_PACKAGE_PATH: "/opt/?.lua;;"
+      KONG_DECLARATIVE_CONFIG: "/opt/kong/config-operator-1.yaml"
+      KONG_LOG_LEVEL: "warn"
+    ports:
+      - 10000:8000
+    volumes:
+      - ./operator-platform/apigateway/config:/opt/kong
+      - ./operator-platform/apigateway/plugins:/opt/kong/plugins
+      - ./operator-platform/apigateway/logs:/opt/logs
+
+  operator-platform-apigateway-2:
+    image: kong:3.1.1-alpine
+    user: kong
+    restart: on-failure
+    environment:
+      KONG_DATABASE: "off"
+      KONG_PLUGINS: "bundled,log-signature"
+      KONG_LUA_PACKAGE_PATH: "/opt/?.lua;;"
+      KONG_DECLARATIVE_CONFIG: "/opt/kong/config-operator-2.yaml"
+      KONG_LOG_LEVEL: "warn"
+    ports:
+      - 20000:8000
+    volumes:
+      - ./operator-platform/apigateway/config:/opt/kong
+      - ./operator-platform/apigateway/plugins:/opt/kong/plugins
+      - ./operator-platform/apigateway/logs:/opt/logs
+
+  operator-platform-camara-apis-1:
+    build:
+      context: ./operator-platform/camara-apis
+    restart: on-failure
+    environment:
+      PORT: 8001
+    ports:
+      - 8001:8001
+
+  operator-platform-camara-apis-2:
+    build:
+      context: ./operator-platform/camara-apis
+    restart: on-failure
+    environment:
+      PORT: 8002
+    ports:
+      - 8002:8002
+
+  operator-platform-authserver-1:
+    build:
+      context: ./operator-platform/authserver
+    depends_on:
+      - mongodb
+    restart: on-failure
+    environment:
+      PORT: 9010
+      HOST: "${OPERATOR_PLATFORM_AUTHSERVER_1_HOST:-http://operator-platform-authserver-1:9010}"
+      DATABASE_HOST: "mongodb:27017"
+      DATABASE_NAME: "authserver-telefonica"
+      OPERATOR_ID: "TELEFONICA"
+      API_HOST: "http://operator-platform-apigateway-1:8000"
+    ports:
+      - 9010:9010
+
+  operator-platform-authserver-2:
+    build:
+      context: ./operator-platform/authserver
+    depends_on:
+      - mongodb
+    restart: on-failure
+    environment:
+      PORT: 9020
+      HOST: "${OPERATOR_PLATFORM_AUTHSERVER_2_HOST:-http://operator-platform-authserver-2:9020}"
+      DATABASE_HOST: "mongodb:27017"
+      DATABASE_NAME: "authserver-vodafone"
+      OPERATOR_ID: "VODAFONE"
+      API_HOST: "http://operator-platform-apigateway-2:8000"
+    ports:
+      - 9020:9020
+
+  #
+  # MISC
+  #
+  mongodb:
+    image: mongo:5.0
+    ports:
+      - 27017:27017
+    command: --quiet --logpath /dev/null
+    restart: on-failure
+    volumes:
+      - mongodbdata:/data/db
+
+  mongo-seed:
+    build:
+      context: ./mongo-seed
+    depends_on:
+      - mongodb
+      - operator-platform-authserver-1
+      - operator-platform-authserver-2
+
+  demo-app:
+    build:
+      context: ./camara-sdks
+    restart: on-failure
+    environment:
+      PORT: 3000
+      HOST: "${DEMO_APP_HOST:-http://localhost:3000}"
+      CAMARA_API_URL: "${CAMARA_API_URL:-http://aggregator-telco-router-2:3322/api}"
+      CAMARA_AUTH_URL: "${CAMARA_AUTH_URL:-http://aggregator-telco-router-2:3322/oauth2}"
+      CAMARA_ISSUER: '73902489-c201-4819-bdf9-3708a484fe21'
+      CAMARA_CLIENT_ID: '73902489-c201-4819-bdf9-3708a484fe21'
+      # For JWKS feature
+      CAMARA_CLIENT_KEY: 'LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlCT1FJQkFBSkJBTDhVcnl6TEg1UEU1bnBXYTJhUGt6TUQrWnIrMTdtZUYzZ1NnejhQSHRCdWk5UVcySmNUCnlJY0wrYk8rcDVNaWFvY0tSMDQxYWdVdjZxWldXei90M05rQ0F3RUFBUUpBTW9UV2Q2SlFlL0lQK1lKRnJQMEMKcnZjN0UvYVN0SG1Pdk9rd0dBajRYYVNYUXNJeVdVRURMYUc1MjBBaGhqV2N3RU5yVWZPU2Y4ZnBjVFI0RXo4WApNUUloQU8zZy9Lc3Z4aUVuMGN4OWQ1TjE0WjNkWGovSmc0cjZHQ2lsSnVDSStodE5BaUVBemFNUHMxZjZDYXcvCnNmS1lZdjJ4UjRBNkJRdWwybE16b2w3VUVJaWFDYjBDSUZYeG1aaEgxRythTVdTT1dDdUF4WmtCcDlHbi9zeXgKZXhVRVJqMk5mNzlwQWg4N2NPY1k4RlZXZG5QeS9DMFFjRVRPWmtKZk12NitIVTdQb0ptc0xkQlpBaUVBcUpsegpubiswdmVTd0xqL3JFbDhtS3MvSW5vQkUzVTh2ODhLY2NGWmhKNzQ9Ci0tLS0tRU5EIFJTQSBQUklWQVRFIEtFWS0tLS0tCg'
+      CAMARA_CLIENT_SECRET: '3184428a-1ea4-4e1c-9969-b623f36fbc2f'
+    ports:
+      - 3000:3000
+    volumes:
+      - ./camara-node-sdk:/apps/camara-node-sdk
+      - nm1:/apps/camara-node-sdk/node_modules
+      - nm2:/apps/camara-node-sdk/demo-app/node_modules
+
+volumes:
+  mongodbdata:
+  nm1:
+  nm2:

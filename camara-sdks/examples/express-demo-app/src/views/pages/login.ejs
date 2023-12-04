@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('../partials/head'); %>
+</head>
+<body class="container">
+
+<main>
+  <div class="jumbotron">
+    <h1>Demo App - Number Verification</h1>
+    <hr/>
+      <div class="alert alert-warning" role="alert">
+        <p>
+          This step simulates how an app can authenticate users using their IP address,
+          obtain an access token and route the API call to the target operator platform.
+        </p>
+      </div>
+    <hr/>
+    <form  action="/login" method="post">
+      <label for="phonenumber" style="width: 120px;">Phone number:</label>
+      <input class="userbox" type="text" name="phonenumber" /><br />
+      <br/>
+      <hr/>
+      <br/>
+      <button type="submit" class="btn btn-primary">Invoke</button>
+
+    </form>
+  
+    <% if (error) { %>
+      <br/>
+      <div class="alert alert-danger" role="alert">
+        <p>
+          An error was produced and you can see the problem in the result.
+        </p>
+      </div>
+      <br />
+      <p>Result: </p>
+      <pre><%= JSON.stringify(error, null, 4) %></pre>
+      <br />
+    <% } %>
+  </div>
+</main>
+
+</body>
+</html>
